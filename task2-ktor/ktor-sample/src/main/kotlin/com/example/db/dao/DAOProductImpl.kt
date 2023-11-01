@@ -34,7 +34,6 @@ class DAOProductImpl : DAOProduct {
             it[Products.categoryId] = categoryId
         }
         insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToProduct)
-
     }
 
     override suspend fun editProduct(id: Int, name: String, quantity: Int, price: Double, categoryId: Int): Boolean = dbQuery {

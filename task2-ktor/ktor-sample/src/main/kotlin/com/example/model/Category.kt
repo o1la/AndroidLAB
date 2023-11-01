@@ -2,6 +2,7 @@ package com.example.model
 
 import kotlinx.serialization.SerialName
 import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.sql.Table
 
 data class Category(
     @SerialName("id") val id: Int,
@@ -10,7 +11,8 @@ data class Category(
     @SerialName("colorId") val colorId: Int
 )
 
-object Categories : IntIdTable() {
+object Categories : Table() {
+    val id = Products.integer("id")
     val name = varchar("name", 50)
     val availability = bool("availability")
     val colorId = integer("colorId")

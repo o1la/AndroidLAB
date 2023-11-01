@@ -1,6 +1,5 @@
 package com.example.db.dao
 
-import com.example.model.Category
 import com.example.model.Product
 
 interface DAOProduct {
