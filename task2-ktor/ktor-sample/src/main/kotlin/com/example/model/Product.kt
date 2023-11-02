@@ -17,5 +17,6 @@ object Products : Table() {
     val quantity = integer("quantity")
     val price = double("price")
     val categoryId = integer("category_id").references(Categories.id)
+    override val primaryKey = PrimaryKey(id, name = "PK_Products_Id")
 }
 
