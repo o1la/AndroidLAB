@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.example.task3_calculator"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.task3_calculator"
@@ -66,4 +66,7 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    implementation("net.objecthunter:exp4j:0.4.8")
+
 }
