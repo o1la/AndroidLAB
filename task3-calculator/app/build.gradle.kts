@@ -68,5 +68,6 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     implementation("net.objecthunter:exp4j:0.4.8")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
 
 }

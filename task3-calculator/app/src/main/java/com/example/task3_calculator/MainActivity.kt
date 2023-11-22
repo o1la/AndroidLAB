@@ -20,8 +20,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -30,7 +28,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.view.WindowCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.task3_calculator.ui.ButtonComponent
 import com.example.task3_calculator.ui.theme.Task3calculatorTheme
 import com.example.task3_calculator.ui.theme.white
@@ -38,19 +36,19 @@ import com.example.task3_calculator.ui.theme.white
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             Task3calculatorTheme {
-                CalculatorScreen(CalcViewModel())
+                CalculatorScreen()
             }
         }
     }
 }
 
 @Composable
-private fun CalculatorScreen(viewModel: CalcViewModel) {
+private fun CalculatorScreen() {
 
-    val result by viewModel.result.collectAsState()
+    val viewModel = viewModel<CalcViewModel>()
+    val state = viewModel.state
 
     Surface(
         color = MaterialTheme.colorScheme.background,
@@ -63,17 +61,18 @@ private fun CalculatorScreen(viewModel: CalcViewModel) {
         ) {
             Column {
                 Text(
-                    text = result,
+                    text = state.number1 + (state.operation?.symbol ?: "") + state.number2,
                     overflow = TextOverflow.Visible,
-                    maxLines = 1,
+                    maxLines = 2,
                     textAlign = TextAlign.End,
                     modifier = Modifier.fillMaxWidth(),
                     color = white,
                     fontSize = 72.sp,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    lineHeight = 80.sp
                 )
                 Spacer(modifier = Modifier.height(20.dp))
-                CalcButtonLayout(CalcViewModel())
+                CalcButtonLayout(viewModel)
             }
         }
     }
@@ -83,7 +82,7 @@ private fun CalculatorScreen(viewModel: CalcViewModel) {
 @Composable
 fun CalcScreenPreview() {
     Task3calculatorTheme {
-        CalculatorScreen(CalcViewModel())
+        CalculatorScreen()
     }
 }
 
@@ -95,23 +94,23 @@ fun CalcButtonLayout(viewModel: CalcViewModel) {
         ActionButton.Ln,
         ActionButton.Percentage,
         ActionButton.Delete,
-        ActionButton.Number("7"),
-        ActionButton.Number("8"),
-        ActionButton.Number("9"),
+        ActionButton.Number(7),
+        ActionButton.Number(8),
+        ActionButton.Number(9),
         ActionButton.Operator(Operators.Power),
         ActionButton.Operator(Operators.Divide),
-        ActionButton.Number("4"),
-        ActionButton.Number("5"),
-        ActionButton.Number("6"),
-        ActionButton.Root,
+        ActionButton.Number(4),
+        ActionButton.Number(5),
+        ActionButton.Number(6),
+        ActionButton.SquareRoot,
         ActionButton.Operator(Operators.Multiply),
-        ActionButton.Number("1"),
-        ActionButton.Number("2"),
-        ActionButton.Number("3"),
+        ActionButton.Number(1),
+        ActionButton.Number(2),
+        ActionButton.Number(3),
         ActionButton.Calculate,
         ActionButton.Operator(Operators.Add),
-        ActionButton.Number("0"),
-        ActionButton.Number("00"),
+        ActionButton.Number(0),
+        ActionButton.Number(0),
         ActionButton.Decimal,
         ActionButton.Sign,
         ActionButton.Operator(Operators.Subtract)
