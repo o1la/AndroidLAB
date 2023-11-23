@@ -4,9 +4,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import java.math.BigDecimal
+import java.math.MathContext
 import kotlin.math.ln
 import kotlin.math.log
-import kotlin.math.pow
 import kotlin.math.sqrt
 
 class CalcViewModel : ViewModel() {
@@ -85,22 +86,34 @@ class CalcViewModel : ViewModel() {
 
 
     private fun calculate() {
-        val number1 = state.number1.toDoubleOrNull()
-        val number2 = state.number2.toDoubleOrNull()
+        val number1 = state.number1.toBigDecimalOrNull()
+        val number2 = state.number2.toBigDecimalOrNull()
+        val context = MathContext(8)
         if (number1 != null && number2 != null) {
-            val result = when (state.operation) {
-                is Operators.Add -> number1 + number2
-                is Operators.Subtract -> number1 - number2
-                is Operators.Multiply -> number1 * number2
-                is Operators.Divide -> number1 / number2
-                is Operators.Power -> number1.pow(number2)
-                null -> return
+            kotlin.runCatching {
+                when (state.operation) {
+                    is Operators.Add -> number1 + number2
+                    is Operators.Subtract -> number1 - number2
+                    is Operators.Multiply -> number1 * number2
+                    is Operators.Divide -> if (number2.compareTo(BigDecimal.ZERO) != 0) {
+                        number1.divide(number2, context)
+                    } else {
+                        BigDecimal.ZERO
+                    }
+
+                    is Operators.Power -> number1.pow(number2.toInt())
+                    null -> return
+                }
+            }.onSuccess { result->
+                state = state.copy(
+                    number1 = result.stripTrailingZeros().toPlainString(),
+                    number2 = "",
+                    operation = null
+                )
+            }.onFailure {
+                BigDecimal.ZERO
             }
-            state = state.copy(
-                number1 = result.toString().take(8),
-                number2 = "",
-                operation = null
-            )
+
         }
     }
 
