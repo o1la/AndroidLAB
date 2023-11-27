@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 class TaskViewModel(private val taskDao: TaskDao) : ViewModel() {
 
@@ -38,13 +37,6 @@ class TaskViewModel(private val taskDao: TaskDao) : ViewModel() {
         _tasks.value = _tasks.value.map {
             if (it.id == task.id) it.copy(status = newStatus) else it
         }
-    }
-
-
-    suspend fun addTask(name: String, description: String, date: LocalDate, status: Boolean) {
-        val newTask = Task(name = name, description = description, date = date, status = status)
-        val id = taskDao.insert(newTask)
-        _tasks.value = listOf(newTask.copy(id = id)) + _tasks.value
     }
 
 }

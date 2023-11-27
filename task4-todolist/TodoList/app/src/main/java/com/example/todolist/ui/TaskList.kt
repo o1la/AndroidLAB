@@ -1,6 +1,5 @@
 package com.example.todolist.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,13 +18,13 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DismissDirection
-import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -56,16 +55,15 @@ fun TaskList(viewModel: TaskViewModel) {
 fun TaskItem(task: Task, viewModel: TaskViewModel) {
 
     val coroutineScope = rememberCoroutineScope()
-    val dismissState = rememberDismissState(
-        confirmValueChange = {
-            if (it == DismissValue.DismissedToEnd || it == DismissValue.DismissedToStart) {
-                coroutineScope.launch {
-                    viewModel.removeTask(task)
-                }
-            }
-            true
+    val dismissState = rememberDismissState()
+
+    LaunchedEffect(dismissState.currentValue) {
+        if (dismissState.isDismissed(DismissDirection.StartToEnd) || dismissState.isDismissed(DismissDirection.EndToStart)) {
+            viewModel.removeTask(task)
+            dismissState.reset()
         }
-    )
+    }
+
 
     SwipeToDismissBox(state = dismissState,
         backgroundContent = {
