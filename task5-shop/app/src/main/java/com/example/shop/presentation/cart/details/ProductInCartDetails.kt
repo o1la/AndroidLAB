@@ -1,4 +1,4 @@
-package com.example.shop.presentation.products.details
+package com.example.shop.presentation.cart.details
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -31,11 +31,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.shop.R
+import com.example.shop.presentation.Screen
+import com.example.shop.presentation.products.details.ProductDetailsViewModel
 import org.koin.compose.koinInject
 
 @Composable
-fun ProductDetails(productId: Long) {
+fun ProductInCartDetails(productId: Long, navController: NavController) {
 
     val viewModel: ProductDetailsViewModel = koinInject()
 
@@ -46,14 +49,33 @@ fun ProductDetails(productId: Long) {
     val product = viewModel.product.collectAsState().value
     var quantity by remember { mutableIntStateOf(1) }
 
+    LaunchedEffect(product) {
+        product?.let {
+            quantity = it.quantityInCart
+        }
+    }
+
     Column(
         modifier = Modifier
             .padding(16.dp)
             .fillMaxSize()
     ) {
-        Text(text = product?.name ?: "", fontSize = 64.sp, modifier = Modifier.padding(bottom = 50.dp))
-        Text(text = product?.description ?: "", fontSize = 24.sp, modifier = Modifier.padding(bottom = 10.dp), fontStyle = FontStyle.Italic)
-        Text(text = "${product?.price?.times(quantity) ?: 0} USD", fontSize = 40.sp, modifier = Modifier.padding(bottom = 20.dp))
+        Text(
+            text = product?.name ?: "",
+            fontSize = 64.sp,
+            modifier = Modifier.padding(bottom = 50.dp)
+        )
+        Text(
+            text = product?.description ?: "",
+            fontSize = 24.sp,
+            modifier = Modifier.padding(bottom = 10.dp),
+            fontStyle = FontStyle.Italic
+        )
+        Text(
+            text = "${product?.price?.times(quantity) ?: 0} USD",
+            fontSize = 40.sp,
+            modifier = Modifier.padding(bottom = 20.dp)
+        )
 
         Row(
             Modifier
@@ -63,19 +85,27 @@ fun ProductDetails(productId: Long) {
             horizontalArrangement = Arrangement.End
         ) {
             IconButton(
-                onClick = { if (quantity > 1) quantity-- },
+                onClick = { if (quantity > 0) quantity-- },
                 modifier = Modifier.size(64.dp)
             ) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, Modifier.size(30.dp))
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = null,
+                    Modifier.size(30.dp)
+                )
             }
 
             Text("$quantity", fontSize = 30.sp)
 
             IconButton(
-                onClick = { quantity++ },
+                onClick = { if (quantity < (product?.quantityInCart ?: 1)) quantity++ },
                 modifier = Modifier.size((64.dp))
             ) {
-                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, Modifier.size(30.dp))
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    Modifier.size(30.dp)
+                )
             }
         }
         Box(
@@ -85,12 +115,22 @@ fun ProductDetails(productId: Long) {
             Button(
                 onClick = {
                     if (product != null) {
-                        viewModel.addToCart(product, quantity)
+                        if (quantity == 0) {
+                            viewModel.removeFromCart(product)
+                        } else if (quantity != product.quantityInCart) {
+                            viewModel.decreaseQuantity(product, product.quantityInCart - quantity)
+                        }
+                        navController.navigate(Screen.Cart.route)
                     }
                 },
                 modifier = Modifier
             ) {
-                Text(stringResource(R.string.add_to_cart), color = Color.White, fontSize = 22.sp, modifier = Modifier.padding(5.dp))
+                Text(
+                    stringResource(R.string.remove_from_cart),
+                    color = Color.White,
+                    fontSize = 22.sp,
+                    modifier = Modifier.padding(5.dp)
+                )
             }
         }
 

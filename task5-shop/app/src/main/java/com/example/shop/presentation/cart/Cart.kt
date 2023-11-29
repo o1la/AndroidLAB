@@ -1,9 +1,7 @@
 package com.example.shop.presentation.cart
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,15 +16,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.shop.database.Product
 import com.example.shop.presentation.PRODUCT_ID_KEY
 import com.example.shop.presentation.Screen
-import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
 @Composable
@@ -51,7 +47,7 @@ fun CartItem(product: Product, navController: NavController) {
             .padding(vertical = 5.dp)
             .clickable {
                 navController.navigate(
-                    Screen.ProductsDetails.route.replace(
+                    Screen.ProductInCartDetails.route.replace(
                         "{$PRODUCT_ID_KEY}",
                         product.id.toString()
                     )
@@ -61,7 +57,6 @@ fun CartItem(product: Product, navController: NavController) {
         Box(
             Modifier.padding(10.dp)
         ) {
-            Column {
                 Row(
                     Modifier
                         .fillMaxSize(),
@@ -71,8 +66,14 @@ fun CartItem(product: Product, navController: NavController) {
                         text = product.name,
                         fontSize = 24.sp,
                     )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.CenterEnd
+                    ) {
+                        Text("Amount: " + product.quantityInCart, fontSize = 20.sp, fontStyle = FontStyle.Italic)
+                    }
                 }
-            }
         }
     }
 }

@@ -10,12 +10,9 @@ import androidx.navigation.compose.composable
 import com.example.shop.presentation.PRODUCT_ID_KEY
 import com.example.shop.presentation.Screen
 import com.example.shop.presentation.cart.Cart
-import com.example.shop.presentation.cart.CartViewModel
-import com.example.shop.presentation.products.details.ProductDetails
+import com.example.shop.presentation.cart.details.ProductInCartDetails
 import com.example.shop.presentation.products.Products
-import com.example.shop.presentation.products.ProductsViewModel
-import com.example.shop.presentation.products.details.ProductDetailsViewModel
-import org.koin.androidx.compose.koinViewModel
+import com.example.shop.presentation.products.details.ProductDetails
 
 @Composable
 fun NavGraph(navController: NavHostController, paddingValues: PaddingValues) {
@@ -30,6 +27,12 @@ fun NavGraph(navController: NavHostController, paddingValues: PaddingValues) {
             val id = it.arguments?.getString(PRODUCT_ID_KEY)?.toLongOrNull()
             if (id != null) {
                 ProductDetails(id)
+            }
+        }
+        composable(Screen.ProductInCartDetails.route) {
+            val id = it.arguments?.getString(PRODUCT_ID_KEY)?.toLongOrNull()
+            if (id != null) {
+                ProductInCartDetails(id, navController)
             }
         }
     }

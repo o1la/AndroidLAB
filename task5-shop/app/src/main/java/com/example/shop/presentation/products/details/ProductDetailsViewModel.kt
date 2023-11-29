@@ -11,13 +11,55 @@ class ProductDetailsViewModel(private val productDao: ProductDao) : ViewModel() 
 
     private val _product = MutableStateFlow<Product?>(null)
     val product: StateFlow<Product?> = _product.asStateFlow()
+
+    private val _toastMessage = MutableStateFlow<String?>(null)
+    val toastMessage: StateFlow<String?> = _toastMessage.asStateFlow()
     fun fetchProductDetails(productId: Long) {
         _product.value = productDao.getProduct(productId)
     }
 
     fun addToCart(product: Product, quantity: Int) {
-        productDao.addProductToCart(product.id)
-        productDao.increaseProductQuantity(product.id, quantity)
+        kotlin.runCatching {
+            productDao.addProductToCart(product.id)
+            productDao.increaseProductQuantity(product.id, quantity)
+        }.fold(
+            onSuccess = {
+                _toastMessage.value = "Successfully added to cart."
+            },
+            onFailure = {
+                _toastMessage.value = "Error occurred."
+            }
+        )
+    }
+
+    fun clearToastMessage() {
+        _toastMessage.value = null
+    }
+
+    fun removeFromCart(product: Product) {
+        kotlin.runCatching {
+            productDao.removeProductFromCart(product.id)
+        }.fold(
+            onSuccess = {
+                _toastMessage.value = "Successfully removed from cart."
+            },
+            onFailure = {
+                _toastMessage.value = "Error occurred."
+            }
+        )
+    }
+
+    fun decreaseQuantity(product: Product, quantity: Int) {
+        kotlin.runCatching {
+            productDao.decreaseProductQuantity(product.id, quantity)
+        }.fold(
+            onSuccess = {
+                _toastMessage.value = "Successfully removed from cart."
+            },
+            onFailure = {
+                _toastMessage.value = "Error occurred."
+            }
+        )
     }
 
 }

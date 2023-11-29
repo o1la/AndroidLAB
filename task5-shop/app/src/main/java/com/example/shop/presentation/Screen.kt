@@ -14,4 +14,6 @@ sealed class Screen(val route: String, val icon: ImageVector, @StringRes val tit
     object Products : Screen("products", Icons.AutoMirrored.Filled.List, R.string.products)
     object Cart : Screen("cart", Icons.Filled.ShoppingCart, R.string.cart)
     object ProductsDetails : Screen("product/{$PRODUCT_ID_KEY}", Icons.Default.Info, R.string.product_details)
+    object ProductInCartDetails : Screen("cart/{$PRODUCT_ID_KEY}", Icons.Default.Info, R.string.product_details )
+
 }

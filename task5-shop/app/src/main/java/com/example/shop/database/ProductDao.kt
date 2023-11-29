@@ -29,11 +29,11 @@ interface ProductDao {
     @Query("UPDATE product_table SET quantityInCart = quantityInCart + :amount WHERE id = :productId")
     fun increaseProductQuantity(productId: Long, amount: Int)
 
-    @Query("UPDATE product_table SET inCart = 0 WHERE id = :productId")
+    @Query("UPDATE product_table SET inCart = 0 AND quantityInCart = 0 WHERE id = :productId")
     fun removeProductFromCart(productId: Long)
 
     @Query("UPDATE product_table SET quantityInCart = quantityInCart - :amount WHERE id = :productId")
-    fun decreaseProductQuantity(productId: Int, amount: Int)
+    fun decreaseProductQuantity(productId: Long, amount: Int)
 
     @Query("SELECT * FROM product_table WHERE id = :productId")
     fun getProduct(productId: Long): Product
