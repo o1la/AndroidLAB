@@ -4,5 +4,5 @@
     <string name="cart">Cart</string>
     <string name="product_details">Product details</string>
     <string name="add_to_cart">Add to Cart</string>
-    <string name="remove_from_cart">Zatwierdź</string>
+    <string name="remove_from_cart">Confirm</string>
 </resources>
