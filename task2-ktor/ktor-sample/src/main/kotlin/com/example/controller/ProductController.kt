@@ -15,11 +15,12 @@ object ProductController {
 
     suspend fun addProduct(call: ApplicationCall) {
         val formParameters = call.receiveParameters()
+        val id = formParameters.getOrFail("id").toInt()
         val name = formParameters.getOrFail("name")
         val quantity = formParameters.getOrFail("quantity").toInt()
         val price = formParameters.getOrFail("price").toDouble()
         val categoryId = formParameters.getOrFail("categoryId").toInt()
-        val product = dao.addNewProduct(name, quantity, price, categoryId)
+        val product = dao.addNewProduct(id, name, quantity, price, categoryId)
         call.respondRedirect("/products/${product?.id}")
     }
 

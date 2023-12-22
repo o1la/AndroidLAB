@@ -13,7 +13,7 @@ data class Category(
 )
 
 object Categories : Table() {
-    val id = integer("id").autoIncrement()
+    val id = integer("id")
     val name = varchar("name", 50)
     val availability = bool("availability")
     val colorId = integer("colorId")

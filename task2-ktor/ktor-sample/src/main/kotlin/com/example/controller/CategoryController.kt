@@ -15,10 +15,11 @@ object CategoryController {
 
     suspend fun addCategory(call: ApplicationCall) {
         val formParameters = call.receiveParameters()
+        val id = formParameters.getOrFail("id").toInt()
         val name = formParameters.getOrFail("name")
         val availability = formParameters.getOrFail("availability").toBoolean()
         val colorId = formParameters.getOrFail("colorId").toInt()
-        val category = daoCategory.addNewCategory(name, availability, colorId)
+        val category = daoCategory.addNewCategory(id, name, availability, colorId)
         call.respondRedirect("/categories/${category?.id}")
     }
 

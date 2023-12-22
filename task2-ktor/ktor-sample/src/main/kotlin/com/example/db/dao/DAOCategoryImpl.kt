@@ -15,6 +15,7 @@ class DAOCategoryImpl : DAOCategory {
         availability = row[Categories.availability],
         colorId = row[Categories.colorId]
     )
+
     override suspend fun allCategories(): List<Category> = dbQuery {
         Categories.selectAll().map(::resultRowToCategory)
     }
@@ -26,8 +27,9 @@ class DAOCategoryImpl : DAOCategory {
             .singleOrNull()
     }
 
-    override suspend fun addNewCategory(name: String, availability: Boolean, colorId: Int): Category? = dbQuery {
+    override suspend fun addNewCategory(id: Int, name: String, availability: Boolean, colorId: Int): Category? = dbQuery {
         val insertStatement = Categories.insert {
+            it[Categories.id] = id
             it[Categories.name] = name
             it[Categories.availability] = availability
             it[Categories.colorId] = colorId
@@ -50,8 +52,17 @@ class DAOCategoryImpl : DAOCategory {
 
 val daoCategory: DAOCategory = DAOCategoryImpl().apply {
     runBlocking {
-        if(allCategories().isEmpty()) {
-            addNewCategory("toys", true, 1)
+        val initCategories = listOf(
+            Category(1, "Toys", true, 1),
+            Category(2, "Clothes", true, 2),
+            Category(3, "Shoes", false, 3),
+            Category(4, "Hats", true, 4),
+            Category(5, "Pet Toys", true, 1),
+        )
+        if (allCategories().isEmpty()) {
+            initCategories.forEach {
+                addNewCategory(it.id, it.name, it.availability, it.colorId)
+            }
         }
     }
 }

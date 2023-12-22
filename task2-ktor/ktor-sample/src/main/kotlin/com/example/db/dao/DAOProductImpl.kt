@@ -26,8 +26,9 @@ class DAOProductImpl : DAOProduct {
             .singleOrNull()
     }
 
-    override suspend fun addNewProduct(name: String, quantity: Int, price: Double, categoryId: Int): Product? = dbQuery {
+    override suspend fun addNewProduct(id: Int, name: String, quantity: Int, price: Double, categoryId: Int): Product? = dbQuery {
         val insertStatement = Products.insert {
+            it[Products.id] = id
             it[Products.name] = name
             it[Products.quantity] = quantity
             it[Products.price] = price
@@ -53,8 +54,17 @@ class DAOProductImpl : DAOProduct {
 
 val dao: DAOProduct = DAOProductImpl().apply {
     runBlocking {
-        if(allProducts().isEmpty()) {
-            addNewProduct("plushie", 1, 1.0, 1)
+        val initProducts = listOf(
+            Product(0, "Bear", 50, 19.99, 1),
+            Product(1, "T-shirt", 5, 29.99, 2),
+            Product(2, "Boots", 0, 59.99, 3),
+            Product(3, "Cap", 1, 9.99, 4),
+            Product(4, "Lego", 1, 100.00, 1),
+        )
+        if (allProducts().isEmpty()) {
+            initProducts.forEach {
+                addNewProduct(it.id, it.name, it.quantity, it.price, it.category)
+            }
         }
     }
 }

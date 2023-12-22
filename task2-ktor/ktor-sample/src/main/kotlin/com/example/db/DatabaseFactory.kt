@@ -14,8 +14,8 @@ object DatabaseFactory {
         val jdbcURL = "jdbc:sqlite:sample.db"
         val database = Database.connect(jdbcURL, driverClassName)
         transaction(database) {
-            SchemaUtils.create(Products)
             SchemaUtils.create(Categories)
+            SchemaUtils.create(Products)
         }
     }
     suspend fun <T> dbQuery(block: suspend () -> T): T =
