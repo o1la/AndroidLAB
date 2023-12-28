@@ -1,6 +1,7 @@
 package com.example.network
 
 import android.app.Application
+import com.example.network.domain.modules.databaseModule
 import com.example.network.domain.modules.restModule
 import com.example.network.domain.modules.viewModelModule
 import org.koin.android.ext.koin.androidContext
@@ -13,7 +14,7 @@ class MyApplication : Application() {
 
         startKoin {
             androidContext(this@MyApplication)
-            modules(restModule, viewModelModule)
+            modules(restModule, viewModelModule, databaseModule)
         }
 
     }

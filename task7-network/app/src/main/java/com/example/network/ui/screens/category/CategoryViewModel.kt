@@ -3,6 +3,7 @@ package com.example.network.ui.screens.category
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.network.db.CategoryDao
 import com.example.network.domain.ApiService
 import com.example.network.models.Category
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,7 +12,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class CategoryViewModel(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val categoryDao: CategoryDao
 ) : ViewModel() {
 
     private val _categories = MutableStateFlow<List<Category>>(emptyList())
@@ -29,6 +31,7 @@ class CategoryViewModel(
                 onFailure = { e -> null to e.message }
             )
             _categories.value = categories ?: emptyList()
+            categoryDao.insertAll(*categories?.toTypedArray() ?: emptyArray())
             _error.value = error
             Log.d("FETCHING-CATEGORY", error.toString())
         }
