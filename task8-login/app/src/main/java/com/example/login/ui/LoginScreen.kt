@@ -30,14 +30,14 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.login.R
 import com.example.login.ui.theme.LoginTheme
 
-
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
 @Composable
-fun LoginScreen() {
+fun LoginScreen(navController: NavController) {
     LoginTheme {
         var email by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
@@ -71,19 +71,25 @@ fun LoginScreen() {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(onClick = { TODO("handle email login") },
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
             ) {
                 Text(stringResource(R.string.log_in_with_email))
             }
 
             Button(onClick = { TODO("handle google login") },
                 colors = ButtonDefaults.buttonColors(Color.White),
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
             ) {
                 Image(
                     painter = painterResource(R.drawable.google_icon),
                     contentDescription = null,
-                    modifier = Modifier.size(24.dp).padding(end = 8.dp)
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(end = 8.dp)
                 )
                 Text(stringResource(R.string.log_in_with_google), color = Color.Black)
             }
@@ -95,14 +101,22 @@ fun LoginScreen() {
                 Image(
                     painter = painterResource(R.drawable.facebook_icon),
                     contentDescription = null,
-                    modifier = Modifier.size(24.dp).padding(end = 8.dp)
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(end = 8.dp)
                 )
                 Text(stringResource(R.string.log_in_with_facebook), color = Color.White)
             }
 
-            TextButton(onClick = { TODO("go to signup screen") }) {
+            TextButton(onClick = { navController.navigate("registration") }) {
                 Text(stringResource(R.string.don_t_have_an_account_sign_up), fontSize = 16.sp)
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LoginPreview() {
+    LoginScreen(navController = rememberNavController())
 }
