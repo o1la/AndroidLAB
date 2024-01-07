@@ -13,3 +13,5 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+stings.xml

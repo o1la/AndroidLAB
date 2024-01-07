@@ -1,5 +1,10 @@
 package com.example.login.ui
 
+import android.app.Activity
+import android.content.Context
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -34,6 +40,17 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.login.R
 import com.example.login.ui.theme.LoginTheme
+import com.facebook.CallbackManager
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
+import com.facebook.login.LoginManager
+import com.facebook.login.LoginResult
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.FacebookAuthProvider
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,6 +58,35 @@ fun LoginScreen(navController: NavController) {
     LoginTheme {
         var email by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
+        var loginError by remember { mutableStateOf<String?>(null) }
+        val context = LocalContext.current
+        val webClientId = stringResource(id = R.string.default_web_client_id)
+
+        val gso = remember {
+            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(webClientId)
+                .requestEmail()
+                .build()
+        }
+        val googleSignInLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                try {
+                    val account = task.getResult(ApiException::class.java)
+                    val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
+                    FirebaseAuth.getInstance().signInWithCredential(credential)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                navController.navigate("home")
+                            }
+                        }
+                } catch (e: ApiException) {
+                    Log.e("LoginScreen", "Google login failed", e)
+                }
+            }
+        }
 
         Column(
             modifier = Modifier
@@ -70,7 +116,21 @@ fun LoginScreen(navController: NavController) {
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(onClick = { TODO("handle email login") },
+            if (loginError != null) {
+                Text(loginError!!, color = Color.Red)
+            }
+            Button(
+                enabled = email.isNotEmpty() && password.isNotEmpty(),
+                onClick = {
+                    FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                navController.navigate("home")
+                            } else {
+                                loginError = task.exception?.message
+                            }
+                        }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
@@ -78,7 +138,12 @@ fun LoginScreen(navController: NavController) {
                 Text(stringResource(R.string.log_in_with_email))
             }
 
-            Button(onClick = { TODO("handle google login") },
+            Button(
+                onClick = {
+                    val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                    val signInIntent = googleSignInClient.signInIntent
+                    googleSignInLauncher.launch(signInIntent)
+                },
                 colors = ButtonDefaults.buttonColors(Color.White),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -94,7 +159,8 @@ fun LoginScreen(navController: NavController) {
                 Text(stringResource(R.string.log_in_with_google), color = Color.Black)
             }
 
-            Button(onClick = { TODO("handle facebook login") },
+            Button(
+                onClick = { handleFacebookLogin(context, navController) },
                 colors = ButtonDefaults.buttonColors(Color(0xFF1877F2)),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -113,6 +179,38 @@ fun LoginScreen(navController: NavController) {
             }
         }
     }
+}
+fun handleFacebookLogin(context: Context, navController: NavController) {
+    val callbackManager = CallbackManager.Factory.create()
+
+
+    LoginManager.getInstance().logInWithReadPermissions(
+        context as Activity, listOf("public_profile")
+    )
+
+    LoginManager.getInstance().registerCallback(callbackManager,
+        object : FacebookCallback<LoginResult> {
+            override fun onSuccess(loginResult: LoginResult) {
+                val credential =
+                    FacebookAuthProvider.getCredential(loginResult.accessToken.token)
+                FirebaseAuth.getInstance().signInWithCredential(credential)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            navController.navigate("home")
+                        } else {
+                            Log.e("LoginScreen", "Facebook login failed")
+                        }
+                    }
+            }
+
+            override fun onCancel() {
+                Log.e("LoginScreen", "Facebook login canceled")
+            }
+
+            override fun onError(error: FacebookException) {
+                Log.e("LoginScreen", "Facebook login failed", error)
+            }
+        })
 }
 
 @Preview(showBackground = true)
