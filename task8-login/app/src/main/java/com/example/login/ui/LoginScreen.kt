@@ -2,6 +2,7 @@ package com.example.login.ui
 
 import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,9 +40,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.login.LocalFacebookCallbackManager
 import com.example.login.R
 import com.example.login.ui.theme.LoginTheme
-import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
 import com.facebook.FacebookException
 import com.facebook.login.LoginManager
@@ -48,7 +50,6 @@ import com.facebook.login.LoginResult
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 
@@ -77,14 +78,37 @@ fun LoginScreen(navController: NavController) {
                     val account = task.getResult(ApiException::class.java)
                     val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
                     FirebaseAuth.getInstance().signInWithCredential(credential)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
+                        .addOnCompleteListener { listenerTask ->
+                            if (listenerTask.isSuccessful) {
                                 navController.navigate("home")
                             }
                         }
                 } catch (e: ApiException) {
                     Log.e("LoginScreen", "Google login failed", e)
                 }
+            }
+        }
+
+        val callbackManager = LocalFacebookCallbackManager.current
+        DisposableEffect(Unit) {
+            LoginManager.getInstance().registerCallback(
+                callbackManager,
+                object : FacebookCallback<LoginResult> {
+                    override fun onSuccess(result: LoginResult) {
+                        navController.navigate("home")
+                    }
+
+                    override fun onCancel() {
+                        Log.d("LoginScreen", "Facebook login canceled")
+                    }
+
+                    override fun onError(error: FacebookException) {
+                        Log.d("LoginScreen", "Facebook login failed: $error")
+                    }
+                }
+            )
+            onDispose {
+                LoginManager.getInstance().unregisterCallback(callbackManager)
             }
         }
 
@@ -160,7 +184,12 @@ fun LoginScreen(navController: NavController) {
             }
 
             Button(
-                onClick = { handleFacebookLogin(context, navController) },
+                onClick = {
+                    context.findActivity()?.let {
+                        LoginManager.getInstance()
+                            .logInWithReadPermissions(it, listOf("email", "public_profile"))
+                    }
+                },
                 colors = ButtonDefaults.buttonColors(Color(0xFF1877F2)),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -180,37 +209,11 @@ fun LoginScreen(navController: NavController) {
         }
     }
 }
-fun handleFacebookLogin(context: Context, navController: NavController) {
-    val callbackManager = CallbackManager.Factory.create()
 
-
-    LoginManager.getInstance().logInWithReadPermissions(
-        context as Activity, listOf("public_profile")
-    )
-
-    LoginManager.getInstance().registerCallback(callbackManager,
-        object : FacebookCallback<LoginResult> {
-            override fun onSuccess(loginResult: LoginResult) {
-                val credential =
-                    FacebookAuthProvider.getCredential(loginResult.accessToken.token)
-                FirebaseAuth.getInstance().signInWithCredential(credential)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            navController.navigate("home")
-                        } else {
-                            Log.e("LoginScreen", "Facebook login failed")
-                        }
-                    }
-            }
-
-            override fun onCancel() {
-                Log.e("LoginScreen", "Facebook login canceled")
-            }
-
-            override fun onError(error: FacebookException) {
-                Log.e("LoginScreen", "Facebook login failed", error)
-            }
-        })
+fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }
 
 @Preview(showBackground = true)
