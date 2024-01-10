@@ -1,6 +1,7 @@
 package com.example.controller
 
 import com.example.db.dao.dao
+import com.example.model.Product
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -14,15 +15,23 @@ object ProductController {
     }
 
     suspend fun addProduct(call: ApplicationCall) {
-        val formParameters = call.receiveParameters()
-        val id = formParameters.getOrFail("id").toInt()
-        val name = formParameters.getOrFail("name")
-        val quantity = formParameters.getOrFail("quantity").toInt()
-        val price = formParameters.getOrFail("price").toDouble()
-        val categoryId = formParameters.getOrFail("categoryId").toInt()
-        val product = dao.addNewProduct(id, name, quantity, price, categoryId)
-        call.respondRedirect("/products/${product?.id}")
+        try {
+            val productData = call.receive<Product>()
+
+            dao.addNewProduct(
+                productData.id,
+                productData.name,
+                productData.quantity,
+                productData.price,
+                productData.category
+            )
+
+            call.respond(HttpStatusCode.OK)
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.BadRequest, "Error adding product: ${e.message}")
+        }
     }
+
 
     suspend fun getProductById(call: ApplicationCall) {
         val id = call.parameters.getOrFail<Int>("id").toInt()

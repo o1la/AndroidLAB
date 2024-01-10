@@ -1,7 +1,6 @@
 package com.example.network.domain.modules
 
 import com.example.network.domain.ApiService
-import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.dsl.module

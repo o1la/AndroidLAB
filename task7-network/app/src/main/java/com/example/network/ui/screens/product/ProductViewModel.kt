@@ -38,4 +38,22 @@ class ProductViewModel(
             Log.d("FETCHING-PRODUCTS", error.toString())
         }
     }
+
+    fun addProduct(product: Product, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val response = apiService.addProducts(product)
+                if (response.isSuccessful) {
+                    onSuccess()
+                    productDao.insert(product)
+                } else {
+                    val errorMessage = response.errorBody()?.string() ?: "Unknown error"
+                    onFailure(errorMessage)
+                }
+            } catch (e: Exception) {
+                onFailure(e.message ?: "Error occurred")
+            }
+        }
+    }
+
 }
