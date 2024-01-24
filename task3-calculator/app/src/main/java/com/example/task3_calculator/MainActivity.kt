@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -65,7 +66,7 @@ private fun CalculatorScreen() {
                     overflow = TextOverflow.Visible,
                     maxLines = 2,
                     textAlign = TextAlign.End,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().testTag("display"),
                     color = white,
                     fontSize = 72.sp,
                     fontWeight = FontWeight.Medium,
@@ -110,7 +111,7 @@ fun CalcButtonLayout(viewModel: CalcViewModel) {
         ActionButton.Calculate,
         ActionButton.Operator(Operators.Add),
         ActionButton.Number(0),
-        ActionButton.Number(0),
+        ActionButton.Number(10),
         ActionButton.Decimal,
         ActionButton.Sign,
         ActionButton.Operator(Operators.Subtract)
@@ -129,6 +130,7 @@ fun CalcButtonLayout(viewModel: CalcViewModel) {
                 modifier = Modifier
                     .aspectRatio(1f)
                     .padding(6.dp)
+                    .testTag(it.symbol)
             )
         }
     }
